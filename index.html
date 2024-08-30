@@ -3,26 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scroll-Controlled GIF</title>
+    <title>Looping Scroll-Controlled GIF</title>
     <style>
         body, html {
             margin: 0;
             padding: 0;
-            height: 300%; /* Make the page scrollable */
+            height: 300vh; /* Make the page scrollable */
             font-family: Arial, sans-serif;
         }
-        .container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #f0f0f0;
-        }
         .gif-container {
+            position: sticky;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 300px;
             height: 300px;
             overflow: hidden;
@@ -46,10 +39,8 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="gif-container">
-            <img src="https://raw.githubusercontent.com/mechaloctopus/UG2/main/4NiS.gif" alt="Scroll-controlled GIF" class="gif-image">
-        </div>
+    <div class="gif-container">
+        <img src="https://raw.githubusercontent.com/mechaloctopus/UG2/main/4NiS.gif" alt="Scroll-controlled GIF" class="gif-image">
     </div>
     <div class="instructions">
         Scroll up or down to control the GIF playback
@@ -59,8 +50,8 @@
     document.addEventListener('DOMContentLoaded', () => {
         const gifImage = document.querySelector('.gif-image');
         const totalFrames = 30;
-        let lastScrollPosition = window.pageYOffset;
-        let currentFrame = 0;
+        let lastScrollY = window.scrollY;
+        let accumulatedScroll = 0;
 
         function updateGifFrame() {
             if (!gifImage) return;
@@ -68,22 +59,16 @@
             const gifHeight = gifImage.naturalHeight;
             const frameHeight = gifHeight / totalFrames;
 
-            const scrollPosition = window.pageYOffset;
-            const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
-            const scrollProgress = scrollPosition / documentHeight;
+            const currentScrollY = window.scrollY;
+            const scrollDifference = currentScrollY - lastScrollY;
+            lastScrollY = currentScrollY;
 
-            // Determine scroll direction
-            const scrollDirection = scrollPosition > lastScrollPosition ? 1 : -1;
-            lastScrollPosition = scrollPosition;
+            // Accumulate scroll and loop it
+            accumulatedScroll += scrollDifference;
+            accumulatedScroll = accumulatedScroll % gifHeight;
+            if (accumulatedScroll < 0) accumulatedScroll += gifHeight;
 
-            // Update frame based on scroll direction
-            if (scrollDirection === 1) {
-                currentFrame = Math.min(currentFrame + 1, totalFrames - 1);
-            } else {
-                currentFrame = Math.max(currentFrame - 1, 0);
-            }
-
-            const frameOffset = currentFrame * frameHeight;
+            const frameOffset = Math.floor(accumulatedScroll / frameHeight) * frameHeight;
             gifImage.style.transform = `translateY(-${frameOffset}px)`;
         }
 
