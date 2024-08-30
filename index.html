@@ -72,20 +72,16 @@
             const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
             const scrollProgress = scrollPosition / documentHeight;
 
-            const targetFrame = Math.floor(scrollProgress * (totalFrames - 1));
-            
             // Determine scroll direction
             const scrollDirection = scrollPosition > lastScrollPosition ? 1 : -1;
             lastScrollPosition = scrollPosition;
 
             // Update frame based on scroll direction
-            if (scrollDirection === 1 && targetFrame > currentFrame) {
-                currentFrame++;
-            } else if (scrollDirection === -1 && targetFrame < currentFrame) {
-                currentFrame--;
+            if (scrollDirection === 1) {
+                currentFrame = Math.min(currentFrame + 1, totalFrames - 1);
+            } else {
+                currentFrame = Math.max(currentFrame - 1, 0);
             }
-
-            currentFrame = Math.max(0, Math.min(currentFrame, totalFrames - 1));
 
             const frameOffset = currentFrame * frameHeight;
             gifImage.style.transform = `translateY(-${frameOffset}px)`;
