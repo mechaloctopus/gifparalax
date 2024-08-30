@@ -51,33 +51,40 @@
         const gifImage = document.querySelector('.gif-image');
         const totalFrames = 30;
         let lastScrollY = window.scrollY;
-        let accumulatedScroll = 0;
+        let currentFrame = 0;
+        let scrollTimeout;
 
-        function updateGifFrame() {
+        function updateGifFrame(direction) {
             if (!gifImage) return;
 
             const gifHeight = gifImage.naturalHeight;
             const frameHeight = gifHeight / totalFrames;
 
-            const currentScrollY = window.scrollY;
-            const scrollDifference = currentScrollY - lastScrollY;
-            lastScrollY = currentScrollY;
+            // Update frame based on scroll direction
+            currentFrame += direction;
+            
+            // Ensure looping
+            if (currentFrame >= totalFrames) currentFrame = 0;
+            if (currentFrame < 0) currentFrame = totalFrames - 1;
 
-            // Accumulate scroll and loop it
-            accumulatedScroll += scrollDifference;
-            accumulatedScroll = accumulatedScroll % gifHeight;
-            if (accumulatedScroll < 0) accumulatedScroll += gifHeight;
-
-            const frameOffset = Math.floor(accumulatedScroll / frameHeight) * frameHeight;
+            const frameOffset = currentFrame * frameHeight;
             gifImage.style.transform = `translateY(-${frameOffset}px)`;
         }
 
         window.addEventListener('scroll', () => {
-            requestAnimationFrame(updateGifFrame);
-        }, { passive: true });
+            clearTimeout(scrollTimeout);
 
-        // Initial update
-        updateGifFrame();
+            const currentScrollY = window.scrollY;
+            const scrollDirection = currentScrollY > lastScrollY ? 1 : -1;
+            lastScrollY = currentScrollY;
+
+            updateGifFrame(scrollDirection);
+
+            // Set a timeout to stop the GIF when scrolling stops
+            scrollTimeout = setTimeout(() => {
+                // GIF stops playing when scrolling stops
+            }, 50);
+        }, { passive: true });
     });
     </script>
 </body>
